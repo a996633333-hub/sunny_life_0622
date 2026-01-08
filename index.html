@@ -13,6 +13,17 @@
             background-color: #f0f2f5;
             text-align: center;
         }
+        /* 新增：首頁點數顯示區塊樣式 */
+        #initialPointsArea {
+            background: #fff;
+            padding: 10px 25px;
+            border-radius: 50px;
+            display: inline-block;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+            font-size: 16px;
+            color: #555;
+        }
         #loading { display: none; color: #666; font-weight: bold; margin-top: 20px; }
         #resultArea { margin-top: 20px; padding: 15px; border-radius: 10px; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: none; }
         .status-success { color: #28a745; font-weight: bold; font-size: 1.2em; }
@@ -22,19 +33,23 @@
 </head>
 <body>
 
-    <h2 style="color: #333;">🐟 陪鱸魚姐姐一起緊緻 🐟</h2>
+    <h2 style="color: #333; margin-bottom: 15px;">🐟 陪鱸魚姐姐一起緊緻 🐟</h2>
 
-    <!-- 新的單一按鈕區域 -->
-    <div class="button-container" style="margin-top: 30px;">
+    <!-- 新增：首頁點數顯示區塊 -->
+    <div id="initialPointsArea">
+        目前已累積：<span id="currentPointsValue" style="color: #FF6B6B; font-weight: bold; font-size: 22px;">🔄</span> 點
+    </div>
+
+    <!-- 單一按鈕區域 -->
+    <div class="button-container">
         <button id="mainBtn" style="background: linear-gradient(45deg, #FF6B6B, #FF8E53); color: white; font-size: 20px; padding: 15px 30px; border-radius: 50px; border: none; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4); width: 90%; max-width: 350px; cursor: pointer;">
             📸 點擊選擇照片或截圖
         </button>
-        <!-- 這裡移除了 capture="environment" 以允許選擇相簿 -->
+        <!-- 移除了 capture="environment" 以允許選擇相簿 -->
         <input type="file" id="imageInput" accept="image/*" style="display: none;">
     </div>
 
-    <!-- 規則說明文字 -->
-   <!-- 新版規則說明文字 (社群截圖版) -->
+    <!-- 新版規則說明文字 (社群截圖版) -->
     <div style="text-align: left; margin: 30px auto; color: #555; font-size: 15px; padding: 20px; background-color: #ffffff; border-radius: 15px; max-width: 350px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
         <p style="margin-bottom: 15px; font-weight: bold; font-size: 17px; text-align: center; color: #FF6B6B;">📅 新版打卡規則說明：</p>
         
@@ -59,12 +74,14 @@
         
         <p style="margin-top: 15px; font-size: 13px; text-align: center; color: #999;">(⚠️ 注意：每日僅限打卡成功一次喔！)</p>
     </div>
+
     <div id="loading">🔄 AI 正在努力辨識中，請稍候...<br>(約需 5-10 秒)</div>
     
     <div id="resultArea">
         <div id="statusText"></div>
         <div id="messageText" style="margin-top: 10px; color: #666;"></div>
-        <div id="pointsDisplay"></div>
+        <!-- 打卡成功後顯示的結果，可以隱藏，因為上方已經有總分顯示了 -->
+        <div id="pointsDisplay" style="display: none;"></div>
     </div>
 
     <script>
@@ -77,10 +94,30 @@
             console.log("LIFF Initialized");
             if (!liff.isLoggedIn()) {
                 liff.login();
+            } else {
+                // 已登入，獲取個人資料並查詢分數
+                liff.getProfile().then(profile => {
+                    fetchInitialPoints(profile.userId);
+                });
             }
         }).catch(err => {
             alert("LIFF 初始化失敗，請檢查 LIFF ID：" + err);
         });
+
+        // 新增：頁面載入時查詢分數的函式
+        function fetchInitialPoints(userId) {
+            const fetchUrl = `${GOOGLE_SCRIPT_URL}?action=getPoints&userId=${userId}`;
+            fetch(fetchUrl)
+                .then(response => response.json())
+                .then(data => {
+                    // 更新頁面上方的分數顯示
+                    document.getElementById('currentPointsValue').innerText = data.total;
+                })
+                .catch(err => {
+                    console.error("Fetch points error:", err);
+                    document.getElementById('currentPointsValue').innerText = "?";
+                });
+        }
 
         // 綁定按鈕點擊事件
         document.getElementById('mainBtn').addEventListener('click', function() {
@@ -105,7 +142,7 @@
             reader.onload = function(event) {
                 const img = new Image();
                 img.onload = function() {
-                    // 簡單壓縮邏輯 (避免圖片過大傳輸失敗)
+                    // 簡單壓縮邏輯
                     const canvas = document.createElement('canvas');
                     let width = img.width;
                     let height = img.height;
@@ -119,7 +156,6 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
                     
-                    // 轉成 Base64 (JPEG, 品質 0.7)
                     const base64Data = canvas.toDataURL('image/jpeg', 0.7);
                     sendToGoogleSheet(base64Data);
                 };
@@ -152,7 +188,7 @@
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('mainBtn').disabled = false;
                     document.getElementById('mainBtn').innerText = "📸 點擊選擇照片或截圖";
-                    document.getElementById('imageInput').value = ''; // 清空輸入框
+                    document.getElementById('imageInput').value = '';
                 });
             }).catch(err => {
                 alert("無法取得使用者資訊：" + err);
@@ -165,22 +201,20 @@
             const resultArea = document.getElementById('resultArea');
             const statusText = document.getElementById('statusText');
             const messageText = document.getElementById('messageText');
-            const pointsDisplay = document.getElementById('pointsDisplay');
-
+            
             resultArea.style.display = 'block';
 
             if (data.status === "SUCCESS") {
                 statusText.innerHTML = '<span class="status-success">🎉 恭喜！打卡成功！</span>';
                 messageText.innerText = "已成功辨識：" + data.items;
-                pointsDisplay.innerHTML = `目前總積分：<span style="color: #FF6B6B; font-weight: bold;">${data.current.total}</span> 點`;
+                // 打卡成功後，同步更新最上方的總分顯示
+                document.getElementById('currentPointsValue').innerText = data.current.total;
             } else if (data.status === "FAIL") {
                 statusText.innerHTML = '<span class="status-fail">⚠️ 打卡失敗</span>';
-                messageText.innerText = "原因：" + data.message;
-                pointsDisplay.innerHTML = "";
+                messageText.innerText = data.message;
             } else {
                 statusText.innerHTML = '<span class="status-fail">❌ 系統錯誤</span>';
                 messageText.innerText = data.message;
-                pointsDisplay.innerHTML = "";
             }
         }
     </script>
