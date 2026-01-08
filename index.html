@@ -27,23 +27,24 @@
     <!-- 新的單一按鈕區域 -->
     <div class="button-container" style="margin-top: 30px;">
         <button id="mainBtn" style="background: linear-gradient(45deg, #FF6B6B, #FF8E53); color: white; font-size: 20px; padding: 15px 30px; border-radius: 50px; border: none; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4); width: 90%; max-width: 350px; cursor: pointer;">
-            📸 點擊拍攝面膜打卡
+            📸 點擊選擇照片或截圖
         </button>
-        <input type="file" id="imageInput" accept="image/*" capture="environment" style="display: none;">
+        <!-- 這裡移除了 capture="environment" 以允許選擇相簿 -->
+        <input type="file" id="imageInput" accept="image/*" style="display: none;">
     </div>
 
     <!-- 規則說明文字 -->
     <div style="text-align: left; margin: 30px auto; color: #555; font-size: 15px; padding: 20px; background-color: #ffffff; border-radius: 15px; max-width: 350px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
         <p style="margin-bottom: 10px; font-weight: bold; font-size: 16px; text-align: center;">📅 打卡規則說明：</p>
         <ul style="padding-left: 20px; margin: 10px 0;">
-            <li>請準備好您的面膜。</li>
-            <li style="margin-top: 8px;">在面膜上用筆<span style="color: #FF6B6B; font-weight: bold;">手寫</span>以下兩行字：</li>
+            <li>請準備好您的面膜照片。</li>
+            <li style="margin-top: 8px;">照片中面膜上需有<span style="color: #FF6B6B; font-weight: bold;">手寫</span>以下兩行字：</li>
         </ul>
         <div style="text-align: center; background: #fff3e0; padding: 10px; border-radius: 8px; font-weight: bold; color: #d84315; margin: 10px 0;">
             #今日日期 (例如 1/8)<br>
             #陪鱸魚姐姐一起緊緻
         </div>
-        <p style="margin-top: 10px; font-size: 13px; text-align: center;">(AI 辨識成功即可獲得 1 點！)</p>
+        <p style="margin-top: 10px; font-size: 13px; text-align: center;">(可以上傳包含照片的截圖)</p>
     </div>
 
     <div id="loading">🔄 AI 正在努力辨識中，請稍候...<br>(約需 5-10 秒)</div>
@@ -122,7 +123,6 @@
                     userId: profile.userId,
                     displayName: profile.displayName,
                     image: base64Data
-                    // 這裡不需要傳 category 了，後端已經統一處理
                 };
 
                 fetch(GOOGLE_SCRIPT_URL, {
@@ -139,7 +139,7 @@
                 .finally(() => {
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('mainBtn').disabled = false;
-                    document.getElementById('mainBtn').innerText = "📸 點擊拍攝面膜打卡";
+                    document.getElementById('mainBtn').innerText = "📸 點擊選擇照片或截圖";
                     document.getElementById('imageInput').value = ''; // 清空輸入框
                 });
             }).catch(err => {
