@@ -3,85 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>陪鱸魚姐姐一起緊緻打卡</title>
+    <title>陪鱸魚姐姐一起緊緻</title>
     <!-- 引入 LINE LIFF SDK -->
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
+        /* 全域樣式設定，背景改為米黃色 */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             padding: 20px;
-            background-color: #f0f2f5;
+            background-color: #FFFBE6; /* 米黃色背景 */
             text-align: center;
+            color: #333;
+            margin: 0;
         }
-        /* 新增：首頁點數顯示區塊樣式 */
-        #initialPointsArea {
-            background: #fff;
-            padding: 10px 25px;
-            border-radius: 50px;
-            display: inline-block;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+
+        /* --- 個人資料卡片區塊樣式 --- */
+        .profile-card {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 30px 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            margin: 20px auto 40px auto; /* 上下留白 */
+            max-width: 400px;
+        }
+
+        .app-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #D84315; /* 深橘色標題 */
             margin-bottom: 25px;
-            font-size: 16px;
-            color: #555;
         }
+
+        /* 頭像樣式 (圓形 + 橘色邊框) */
+        #userAvatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 4px solid #FF8E53;
+            object-fit: cover; /* 確保圖片不變形 */
+            margin-bottom: 15px;
+            background-color: #eee; /* 載入前的佔位色 */
+        }
+
+        /* 暱稱樣式 */
+        #userName {
+            font-size: 20px;
+            font-weight: bold;
+            color: #D84315;
+            margin-bottom: 20px;
+        }
+
+        .points-label {
+            font-size: 16px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        /* 超大點數數字樣式 */
+        #userPoints {
+            font-size: 90px; /* 字體特大 */
+            font-weight: 900;
+            color: #FF9800; /* 明亮橘色 */
+            line-height: 1;
+            font-family: 'Arial Black', sans-serif; /* 使用更粗的字體 */
+        }
+
+        .points-unit {
+            font-size: 40px;
+            font-weight: bold;
+            color: #FF9800;
+            display: block; /* 讓「點」字換行顯示 */
+            margin-top: 10px;
+        }
+        /* -------------------------------- */
+
+        /* 按鈕樣式 */
+        .button-container { margin-top: 30px; }
+        #mainBtn {
+            background: linear-gradient(45deg, #FF6B6B, #FF8E53); color: white; font-size: 18px; padding: 12px 30px; border-radius: 50px; border: none; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3); width: 80%; max-width: 300px; cursor: pointer;
+        }
+        /* 規則樣式 */
+        .rules-container { text-align: left; margin: 30px auto; color: #555; font-size: 14px; padding: 20px; background-color: #ffffff90; border-radius: 15px; max-width: 350px; }
+        /* 其他樣式 */
         #loading { display: none; color: #666; font-weight: bold; margin-top: 20px; }
         #resultArea { margin-top: 20px; padding: 15px; border-radius: 10px; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: none; }
         .status-success { color: #28a745; font-weight: bold; font-size: 1.2em; }
         .status-fail { color: #dc3545; font-weight: bold; font-size: 1.1em; }
-        #pointsDisplay { margin-top: 15px; font-size: 1.1em; color: #333; }
     </style>
 </head>
 <body>
 
-    <h2 style="color: #333; margin-bottom: 15px;">🐟 陪鱸魚姐姐一起緊緻 🐟</h2>
-
-    <!-- 新增：首頁點數顯示區塊 -->
-    <div id="initialPointsArea">
-        目前已累積：<span id="currentPointsValue" style="color: #FF6B6B; font-weight: bold; font-size: 22px;">🔄</span> 點
+    <!-- 個人資料卡片區塊 -->
+    <div class="profile-card">
+        <!-- 標題已修改 -->
+        <div class="app-title">🐟 陪鱸魚姐姐一起緊緻 🐟</div>
+        
+        <!-- 頭像圖片 -->
+        <img id="userAvatar" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="User Avatar">
+        
+        <!-- 使用者暱稱 -->
+        <div id="userName">載入中...</div>
+        
+        <div class="points-label">目前累積</div>
+        
+        <!-- 大數字點數顯示 -->
+        <div>
+            <span id="userPoints">...</span>
+            <span class="points-unit">點</span>
+        </div>
     </div>
 
-    <!-- 單一按鈕區域 -->
+
+    <!-- 打卡按鈕 -->
     <div class="button-container">
-        <button id="mainBtn" style="background: linear-gradient(45deg, #FF6B6B, #FF8E53); color: white; font-size: 20px; padding: 15px 30px; border-radius: 50px; border: none; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4); width: 90%; max-width: 350px; cursor: pointer;">
-            📸 點擊選擇照片或截圖
-        </button>
-        <!-- 移除了 capture="environment" 以允許選擇相簿 -->
+        <button id="mainBtn">📸 點擊開始今日打卡</button>
         <input type="file" id="imageInput" accept="image/*" style="display: none;">
     </div>
 
-    <!-- 新版規則說明文字 (社群截圖版) -->
-    <div style="text-align: left; margin: 30px auto; color: #555; font-size: 15px; padding: 20px; background-color: #ffffff; border-radius: 15px; max-width: 350px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-        <p style="margin-bottom: 15px; font-weight: bold; font-size: 17px; text-align: center; color: #FF6B6B;">📅 新版打卡規則說明：</p>
-        
-        <div style="margin-bottom: 15px; padding-left: 10px; border-left: 4px solid #FF8E53;">
-            <strong style="color: #333;">步驟 1：在社群發言</strong>
-            <p style="margin: 5px 0 10px 0; font-size: 14px;">請先在 LINE 社群中傳送以下文字：</p>
-            <div style="background: #eee; padding: 8px; border-radius: 5px; font-weight: bold; color: #555; font-size: 14px;">
-                #今日日期 (例如 #1/9)<br>
-                #陪鱸魚姐姐一起緊緻
-            </div>
-        </div>
 
-        <div style="margin-bottom: 15px; padding-left: 10px; border-left: 4px solid #FF8E53;">
-            <strong style="color: #333;">步驟 2：接著傳送照片</strong>
-            <p style="margin: 5px 0; font-size: 14px;">緊接著文字後，傳送一張面膜照片，面膜上必須有<span style="color: #FF6B6B; font-weight: bold;">手寫今日日期</span>。</p>
-        </div>
-
-        <div style="margin-bottom: 15px; padding-left: 10px; border-left: 4px solid #FF6B6B;">
-            <strong style="color: #d84315;">步驟 3：截圖打卡 (關鍵!)</strong>
-            <p style="margin: 5px 0; font-size: 14px;">將包含上述「文字」與「照片」的<span style="color: #FF6B6B; font-weight: bold;">對話畫面截圖</span>，上傳到這裡。</p>
-        </div>
-        
-        <p style="margin-top: 15px; font-size: 13px; text-align: center; color: #999;">(⚠️ 注意：每日僅限打卡成功一次喔！)</p>
+    <!-- 規則說明 -->
+    <div class="rules-container">
+        <p style="margin-bottom: 10px; font-weight: bold; text-align: center; color: #FF6B6B;">📅 簡易打卡規則提醒：</p>
+        <ol style="padding-left: 20px; margin: 10px 0; color: #666;">
+            <li>在社群發送「#今日日期」+「#陪鱸魚姐姐一起緊緻」。</li>
+            <li>接著發送一張有「手寫今日日期」的面膜照片。</li>
+            <li>將上述對話畫面「截圖」並上傳。</li>
+        </ol>
+        <p style="margin-top: 10px; font-size: 12px; text-align: center; color: #999;">(每日限打卡一次)</p>
     </div>
 
-    <div id="loading">🔄 AI 正在努力辨識中，請稍候...<br>(約需 5-10 秒)</div>
-    
+    <!-- 載入與結果顯示區 -->
+    <div id="loading">🔄 AI 正在努力審核中...<br>(約需 5-10 秒)</div>
     <div id="resultArea">
         <div id="statusText"></div>
         <div id="messageText" style="margin-top: 10px; color: #666;"></div>
-        <!-- 打卡成功後顯示的結果，可以隱藏，因為上方已經有總分顯示了 -->
-        <div id="pointsDisplay" style="display: none;"></div>
     </div>
 
     <script>
@@ -91,47 +146,63 @@
 
         // 初始化 LIFF
         liff.init({ liffId: LIFF_ID }).then(() => {
-            console.log("LIFF Initialized");
             if (!liff.isLoggedIn()) {
                 liff.login();
             } else {
-                // 已登入，獲取個人資料並查詢分數
                 liff.getProfile().then(profile => {
+                    document.getElementById('userAvatar').src = profile.pictureUrl;
+                    document.getElementById('userName').innerText = profile.displayName;
                     fetchInitialPoints(profile.userId);
+                }).catch(err => {
+                    console.error("Profile Error:", err);
+                    document.getElementById('userName').innerText = "無法取得資料";
                 });
             }
         }).catch(err => {
-            alert("LIFF 初始化失敗，請檢查 LIFF ID：" + err);
+            alert("LIFF 初始化失敗：" + err);
         });
 
-        // 新增：頁面載入時查詢分數的函式
+        // 查詢分數函式
         function fetchInitialPoints(userId) {
             const fetchUrl = `${GOOGLE_SCRIPT_URL}?action=getPoints&userId=${userId}`;
             fetch(fetchUrl)
                 .then(response => response.json())
                 .then(data => {
-                    // 更新頁面上方的分數顯示
-                    document.getElementById('currentPointsValue').innerText = data.total;
+                    animateValue("userPoints", 0, data.total, 1000);
                 })
                 .catch(err => {
-                    console.error("Fetch points error:", err);
-                    document.getElementById('currentPointsValue').innerText = "?";
+                    document.getElementById('userPoints').innerText = "?";
                 });
         }
 
-        // 綁定按鈕點擊事件
+        // 數字跳動動畫
+        function animateValue(id, start, end, duration) {
+            if (start === end) return;
+            const range = end - start;
+            let current = start;
+            const increment = end > start? 1 : -1;
+            const stepTime = Math.abs(Math.floor(duration / range));
+            const obj = document.getElementById(id);
+            const timer = setInterval(function() {
+                current += increment;
+                obj.innerHTML = current;
+                if (current == end) {
+                    clearInterval(timer);
+                }
+            }, stepTime);
+        }
+
+        // 綁定事件
         document.getElementById('mainBtn').addEventListener('click', function() {
             document.getElementById('imageInput').click();
         });
 
-        // 綁定圖片選擇事件
         document.getElementById('imageInput').addEventListener('change', function(e) {
             if (e.target.files.length === 0) return;
-            const file = e.target.files[0];
-            processAndUploadImage(file);
+            processAndUploadImage(e.target.files[0]);
         });
 
-        // 處理並上傳圖片
+        // 處理並上傳
         function processAndUploadImage(file) {
             document.getElementById('loading').style.display = 'block';
             document.getElementById('resultArea').style.display = 'none';
@@ -142,20 +213,12 @@
             reader.onload = function(event) {
                 const img = new Image();
                 img.onload = function() {
-                    // 簡單壓縮邏輯
                     const canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
-                    const maxWidth = 1024;
-                    if (width > maxWidth) {
-                        height = Math.round(height * (maxWidth / width));
-                        width = maxWidth;
-                    }
-                    canvas.width = width;
-                    canvas.height = height;
+                    let width = img.width; let height = img.height; const maxWidth = 1024;
+                    if (width > maxWidth) { height = Math.round(height * (maxWidth / width)); width = maxWidth; }
+                    canvas.width = width; canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
-                    
                     const base64Data = canvas.toDataURL('image/jpeg', 0.7);
                     sendToGoogleSheet(base64Data);
                 };
@@ -164,35 +227,25 @@
             reader.readAsDataURL(file);
         }
 
-        // 傳送到 Google Apps Script
+        // 傳送到後端
         function sendToGoogleSheet(base64Data) {
             liff.getProfile().then(profile => {
-                const payload = {
-                    userId: profile.userId,
-                    displayName: profile.displayName,
-                    image: base64Data
-                };
-
-                fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(payload)
-                })
+                const payload = { userId: profile.userId, displayName: profile.displayName, image: base64Data };
+                fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
                 .then(response => response.json())
                 .then(data => {
                     showResult(data);
+                    if (data.status === "SUCCESS") {
+                        fetchInitialPoints(profile.userId); // 成功後更新分數
+                    }
                 })
-                .catch(error => {
-                    showResult({ status: "ERROR", message: "連線失敗：" + error });
-                })
+                .catch(error => { showResult({ status: "ERROR", message: "連線失敗：" + error }); })
                 .finally(() => {
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('mainBtn').disabled = false;
-                    document.getElementById('mainBtn').innerText = "📸 點擊選擇照片或截圖";
+                    document.getElementById('mainBtn').innerText = "📸 點擊開始今日打卡";
                     document.getElementById('imageInput').value = '';
                 });
-            }).catch(err => {
-                alert("無法取得使用者資訊：" + err);
-                document.getElementById('loading').style.display = 'none';
             });
         }
 
@@ -201,14 +254,10 @@
             const resultArea = document.getElementById('resultArea');
             const statusText = document.getElementById('statusText');
             const messageText = document.getElementById('messageText');
-            
             resultArea.style.display = 'block';
-
             if (data.status === "SUCCESS") {
                 statusText.innerHTML = '<span class="status-success">🎉 恭喜！打卡成功！</span>';
-                messageText.innerText = "已成功辨識：" + data.items;
-                // 打卡成功後，同步更新最上方的總分顯示
-                document.getElementById('currentPointsValue').innerText = data.current.total;
+                messageText.innerText = "點數已更新！";
             } else if (data.status === "FAIL") {
                 statusText.innerHTML = '<span class="status-fail">⚠️ 打卡失敗</span>';
                 messageText.innerText = data.message;
