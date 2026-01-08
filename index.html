@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>陪鱸魚姐姐一起緊緻打卡</title>
+    <!-- 引入 LINE LIFF SDK -->
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f2f5;
+            text-align: center;
+        }
+        #loading { display: none; color: #666; font-weight: bold; margin-top: 20px; }
+        #resultArea { margin-top: 20px; padding: 15px; border-radius: 10px; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: none; }
+        .status-success { color: #28a745; font-weight: bold; font-size: 1.2em; }
+        .status-fail { color: #dc3545; font-weight: bold; font-size: 1.1em; }
+        #pointsDisplay { margin-top: 15px; font-size: 1.1em; color: #333; }
+    </style>
+</head>
+<body>
+
+    <h2 style="color: #333;">🐟 陪鱸魚姐姐一起緊緻 🐟</h2>
+
+    <!-- 新的單一按鈕區域 -->
+    <div class="button-container" style="margin-top: 30px;">
+        <button id="mainBtn" style="background: linear-gradient(45deg, #FF6B6B, #FF8E53); color: white; font-size: 20px; padding: 15px 30px; border-radius: 50px; border: none; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4); width: 90%; max-width: 350px; cursor: pointer;">
+            📸 點擊拍攝面膜打卡
+        </button>
+        <input type="file" id="imageInput" accept="image/*" capture="environment" style="display: none;">
+    </div>
+
+    <!-- 規則說明文字 -->
+    <div style="text-align: left; margin: 30px auto; color: #555; font-size: 15px; padding: 20px; background-color: #ffffff; border-radius: 15px; max-width: 350px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+        <p style="margin-bottom: 10px; font-weight: bold; font-size: 16px; text-align: center;">📅 打卡規則說明：</p>
+        <ul style="padding-left: 20px; margin: 10px 0;">
+            <li>請準備好您的面膜。</li>
+            <li style="margin-top: 8px;">在面膜上用筆<span style="color: #FF6B6B; font-weight: bold;">手寫</span>以下兩行字：</li>
+        </ul>
+        <div style="text-align: center; background: #fff3e0; padding: 10px; border-radius: 8px; font-weight: bold; color: #d84315; margin: 10px 0;">
+            #今日日期 (例如 1/8)<br>
+            #陪鱸魚姐姐一起緊緻
+        </div>
+        <p style="margin-top: 10px; font-size: 13px; text-align: center;">(AI 辨識成功即可獲得 1 點！)</p>
+    </div>
+
+    <div id="loading">🔄 AI 正在努力辨識中，請稍候...<br>(約需 5-10 秒)</div>
+    
+    <div id="resultArea">
+        <div id="statusText"></div>
+        <div id="messageText" style="margin-top: 10px; color: #666;"></div>
+        <div id="pointsDisplay"></div>
+    </div>
+
+    <script>
+        // 🔴 設定區：請確認這裡填的是你正確的資訊
+        const LIFF_ID = "2008849214-ADiOsYy8";
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbynBFRoWgGHVDC6wJ5Xi1Z8L7UBHS9d6JW3_P0zSgltexEpo0DygOUiPvo8G-eEKeNV/exec";
+
+        // 初始化 LIFF
+        liff.init({ liffId: LIFF_ID }).then(() => {
+            console.log("LIFF Initialized");
+            if (!liff.isLoggedIn()) {
+                liff.login();
+            }
+        }).catch(err => {
+            alert("LIFF 初始化失敗，請檢查 LIFF ID：" + err);
+        });
+
+        // 綁定按鈕點擊事件
+        document.getElementById('mainBtn').addEventListener('click', function() {
+            document.getElementById('imageInput').click();
+        });
+
+        // 綁定圖片選擇事件
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            if (e.target.files.length === 0) return;
+            const file = e.target.files[0];
+            processAndUploadImage(file);
+        });
+
+        // 處理並上傳圖片
+        function processAndUploadImage(file) {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('resultArea').style.display = 'none';
+            document.getElementById('mainBtn').disabled = true;
+            document.getElementById('mainBtn').innerText = "處理中...";
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    // 簡單壓縮邏輯 (避免圖片過大傳輸失敗)
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    const maxWidth = 1024;
+                    if (width > maxWidth) {
+                        height = Math.round(height * (maxWidth / width));
+                        width = maxWidth;
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // 轉成 Base64 (JPEG, 品質 0.7)
+                    const base64Data = canvas.toDataURL('image/jpeg', 0.7);
+                    sendToGoogleSheet(base64Data);
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 傳送到 Google Apps Script
+        function sendToGoogleSheet(base64Data) {
+            liff.getProfile().then(profile => {
+                const payload = {
+                    userId: profile.userId,
+                    displayName: profile.displayName,
+                    image: base64Data
+                    // 這裡不需要傳 category 了，後端已經統一處理
+                };
+
+                fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    showResult(data);
+                })
+                .catch(error => {
+                    showResult({ status: "ERROR", message: "連線失敗：" + error });
+                })
+                .finally(() => {
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('mainBtn').disabled = false;
+                    document.getElementById('mainBtn').innerText = "📸 點擊拍攝面膜打卡";
+                    document.getElementById('imageInput').value = ''; // 清空輸入框
+                });
+            }).catch(err => {
+                alert("無法取得使用者資訊：" + err);
+                document.getElementById('loading').style.display = 'none';
+            });
+        }
+
+        // 顯示結果
+        function showResult(data) {
+            const resultArea = document.getElementById('resultArea');
+            const statusText = document.getElementById('statusText');
+            const messageText = document.getElementById('messageText');
+            const pointsDisplay = document.getElementById('pointsDisplay');
+
+            resultArea.style.display = 'block';
+
+            if (data.status === "SUCCESS") {
+                statusText.innerHTML = '<span class="status-success">🎉 恭喜！打卡成功！</span>';
+                messageText.innerText = "已成功辨識：" + data.items;
+                pointsDisplay.innerHTML = `目前總積分：<span style="color: #FF6B6B; font-weight: bold;">${data.current.total}</span> 點`;
+            } else if (data.status === "FAIL") {
+                statusText.innerHTML = '<span class="status-fail">⚠️ 打卡失敗</span>';
+                messageText.innerText = "原因：" + data.message;
+                pointsDisplay.innerHTML = "";
+            } else {
+                statusText.innerHTML = '<span class="status-fail">❌ 系統錯誤</span>';
+                messageText.innerText = data.message;
+                pointsDisplay.innerHTML = "";
+            }
+        }
+    </script>
+</body>
+</html>
