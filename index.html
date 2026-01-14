@@ -23,7 +23,7 @@
             border-radius: 24px;
             padding: 30px 20px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-            margin: 20px auto 30px auto; /* 上下留白 */
+            margin: 20px auto 40px auto; /* 上下留白 */
             max-width: 400px;
         }
 
@@ -78,36 +78,24 @@
         /* -------------------------------- */
 
         /* 按鈕樣式 */
-        .button-container { margin-top: 20px; margin-bottom: 30px; }
+        .button-container { margin-top: 30px; }
         #mainBtn {
-            background: linear-gradient(45deg, #FF6B6B, #FF8E53); color: white; font-size: 18px; padding: 14px 30px; border-radius: 50px; border: none; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3); width: 85%; max-width: 320px; cursor: pointer; font-weight: bold;
+            background: linear-gradient(45deg, #FF6B6B, #FF8E53); color: white; font-size: 18px; padding: 12px 30px; border-radius: 50px; border: none; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3); width: 80%; max-width: 300px; cursor: pointer;
         }
-        
-        /* V3 新版規則樣式 (更醒目) */
-        .rules-container { 
-            text-align: left; 
-            margin: 20px auto; 
-            color: #333; 
-            font-size: 14px; 
-            padding: 20px 25px; 
-            background-color: #fff3e0; /* 淺橘色背景 */
-            border: 2px solid #FF8E53; /* 深橘色邊框 */
-            border-radius: 15px; 
-            max-width: 350px; 
-        }
-
+        /* 規則樣式 */
+        .rules-container { text-align: left; margin: 30px auto; color: #555; font-size: 14px; padding: 20px; background-color: #ffffff90; border-radius: 15px; max-width: 350px; }
         /* 其他樣式 */
-        #loading { display: none; color: #D84315; font-weight: bold; margin-top: 20px; font-size: 16px; }
-        #resultArea { margin-top: 20px; padding: 20px; border-radius: 15px; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none; max-width: 350px; margin-left: auto; margin-right: auto; }
-        .status-success { color: #28a745; font-weight: bold; font-size: 1.3em; }
-        .status-fail { color: #dc3545; font-weight: bold; font-size: 1.2em; display: block; margin-bottom: 10px; }
-        #messageText { font-size: 15px; line-height: 1.5; }
+        #loading { display: none; color: #666; font-weight: bold; margin-top: 20px; }
+        #resultArea { margin-top: 20px; padding: 15px; border-radius: 10px; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: none; }
+        .status-success { color: #28a745; font-weight: bold; font-size: 1.2em; }
+        .status-fail { color: #dc3545; font-weight: bold; font-size: 1.1em; }
     </style>
 </head>
 <body>
 
     <!-- 個人資料卡片區塊 -->
     <div class="profile-card">
+        <!-- 標題已修改 -->
         <div class="app-title">🐟 陪鱸魚姐姐一起緊緻 🐟</div>
         
         <!-- 頭像圖片 -->
@@ -128,40 +116,27 @@
 
     <!-- 打卡按鈕 -->
     <div class="button-container">
-        <button id="mainBtn">📸 點擊上傳截圖打卡</button>
+        <button id="mainBtn">📸 點擊開始今日打卡</button>
         <input type="file" id="imageInput" accept="image/*" style="display: none;">
     </div>
 
 
-    <!-- V3 新版規則說明 -->
+    <!-- 規則說明 -->
     <div class="rules-container">
-        <p style="margin-bottom: 15px; font-weight: bold; text-align: center; color: #D84315; font-size: 17px;">📅 V3 最新打卡規則：</p>
-        <ol style="padding-left: 20px; margin: 10px 0; color: #333; font-size: 15px; line-height: 1.6;">
-            <li style="margin-bottom: 12px;">
-                <span style="color: #D84315; font-weight: bold;">[重要] 限定社群：</span><br>
-                請務必在<span style="background:#ffccbc; padding: 2px 6px; border-radius: 4px; font-weight: bold;">「鱸魚姐姐加碼送🐟社群」</span>內進行打卡。
-            </li>
-            <li style="margin-bottom: 12px;">
-                發送文字：「#今日日期」+「#陪鱸魚姐姐一起緊緻」。
-            </li>
-            <li style="margin-bottom: 12px;">
-                接著發送一張有「手寫今日日期」的面膜照片。
-            </li>
-            <li>
-                將包含<span style="color: #D84315; font-weight: bold;">社群標題</span>、文字與照片的完整畫面截圖上傳。
-            </li>
+        <p style="margin-bottom: 10px; font-weight: bold; text-align: center; color: #FF6B6B;">📅 簡易打卡規則提醒：</p>
+        <ol style="padding-left: 20px; margin: 10px 0; color: #666;">
+            <li>在社群發送「#今日日期」+「#陪鱸魚姐姐一起緊緻」。</li>
+            <li>接著發送一張有「手寫今日日期」的面膜照片。</li>
+            <li>將上述對話畫面「截圖」並上傳。</li>
         </ol>
-        <p style="margin-top: 15px; font-size: 13px; text-align: center; color: #888; border-top: 1px dashed #FF8E53; padding-top: 10px;">
-            (系統會自動辨識您在該社群的暱稱哦！)<br>
-            (每日限打卡成功一次)
-        </p>
+        <p style="margin-top: 10px; font-size: 12px; text-align: center; color: #999;">(每日限打卡一次)</p>
     </div>
 
     <!-- 載入與結果顯示區 -->
-    <div id="loading">🔄 AI 正在審核社群截圖中...<br>(約需 5-10 秒)</div>
+    <div id="loading">🔄 AI 正在努力審核中...<br>(約需 5-10 秒)</div>
     <div id="resultArea">
         <div id="statusText"></div>
-        <div id="messageText" style="margin-top: 10px; color: #555;"></div>
+        <div id="messageText" style="margin-top: 10px; color: #666;"></div>
     </div>
 
     <script>
@@ -181,7 +156,6 @@
                 }).catch(err => {
                     console.error("Profile Error:", err);
                     document.getElementById('userName').innerText = "無法取得資料";
-                    document.getElementById('userAvatar').src = "https://via.placeholder.com/100?text=Error";
                 });
             }
         }).catch(err => {
@@ -203,10 +177,7 @@
 
         // 數字跳動動畫
         function animateValue(id, start, end, duration) {
-            if (start === end) {
-                 document.getElementById(id).innerHTML = end;
-                 return;
-            }
+            if (start === end) return;
             const range = end - start;
             let current = start;
             const increment = end > start? 1 : -1;
@@ -272,7 +243,7 @@
                 .finally(() => {
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('mainBtn').disabled = false;
-                    document.getElementById('mainBtn').innerText = "📸 點擊上傳截圖打卡";
+                    document.getElementById('mainBtn').innerText = "📸 點擊開始今日打卡";
                     document.getElementById('imageInput').value = '';
                 });
             });
@@ -284,13 +255,9 @@
             const statusText = document.getElementById('statusText');
             const messageText = document.getElementById('messageText');
             resultArea.style.display = 'block';
-            
-            // 自動捲動到結果區
-            resultArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
             if (data.status === "SUCCESS") {
-                statusText.innerHTML = '<span class="status-success">🎉 審核通過！打卡成功！</span>';
-                messageText.innerHTML = "點數已更新！<br><span style='font-size:13px; color:#888'>(請確認社群暱稱是否正確記錄在後台)</span>";
+                statusText.innerHTML = '<span class="status-success">🎉 恭喜！打卡成功！</span>';
+                messageText.innerText = "點數已更新！";
             } else if (data.status === "FAIL") {
                 statusText.innerHTML = '<span class="status-fail">⚠️ 打卡失敗</span>';
                 messageText.innerText = data.message;
